@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package capacity;
+
+option go_package = "./proto";
+
+service CapacityService {
+    rpc GetMachineInfo(GetMachineInfoRequest) returns (GetMachineInfoResponse) {}
+}
+
+message GetMachineInfoRequest {
+}
+
+message GetMachineInfoResponse {
+    int32 cpu = 1;
+    int32 ram = 2;
+}
