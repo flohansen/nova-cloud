@@ -1,28 +1,13 @@
 package main
 
 import (
-	"context"
 	"log"
 	"net"
 
-	"github.com/flohansen/nova-cloud/capacity/internal/proc"
+	"github.com/flohansen/nova-cloud/capacity/internal/api"
 	proto "github.com/flohansen/nova-cloud/proto/go"
 	"google.golang.org/grpc"
 )
-
-type server struct {
-	proto.UnimplementedCapacityServiceServer
-}
-
-func (s *server) GetMachineInfo(context.Context, *proto.GetMachineInfoRequest) (*proto.GetMachineInfoResponse, error) {
-	cores := proc.GetCores()
-	memInfo := proc.GetMemInfo()
-
-	return &proto.GetMachineInfoResponse{
-		Cpu: cores,
-		Ram: memInfo.MemTotal,
-	}, nil
-}
 
 func main() {
 	lis, err := net.Listen("tcp", ":3000")
@@ -31,6 +16,8 @@ func main() {
 	}
 
 	srv := grpc.NewServer()
-	proto.RegisterCapacityServiceServer(srv, &server{})
-	srv.Serve(lis)
+	proto.RegisterCapacityServiceServer(srv, &api.Server{})
+	if err := srv.Serve(lis); err != nil {
+		log.Fatalf("could not serve: %s", err)
+	}
 }
