@@ -1,8 +1,9 @@
 package proc
 
-import "os"
+import (
+	"runtime"
+)
 
 func GetCores() int32 {
-	cores, _ := os.ReadDir("/sys/devices/virtual/cpuid")
-	return int32(len(cores))
+	return int32(runtime.NumCPU())
 }
