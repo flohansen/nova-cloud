@@ -1,3 +1,5 @@
+github.com/flohansen/nova-cloud/proto v0.0.0-20241230153155-d680aafbe629 h1:LJeSeeZSUELROamAbTQQ/vHRN9RyuLjMaOKRn8U64AU=
+github.com/flohansen/nova-cloud/proto v0.0.0-20241230153155-d680aafbe629/go.mod h1:vb7R2cPZfT2+vXDQCC6LbihkOPZ1vzodsVchJXtd8ZU=
 github.com/go-logr/logr v1.4.2 h1:6pFjapn8bFcIbiKo3XT4j/BhANplGihG6tvd+8rYgrY=
 github.com/go-logr/logr v1.4.2/go.mod h1:9T104GzyrTigFIr8wt5mBrctHMim0Nb2HLGrmQ40KvY=
 github.com/go-logr/stdr v1.2.2 h1:hSWxHoqTgW2S2qGc0LTAI563KZ5YKYRhT3MFKZMbjag=
