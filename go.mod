@@ -1,9 +1,8 @@
-module github.com/flohansen/nova-cloud/capacity
+module github.com/flohansen/nova-cloud
 
 go 1.23.4
 
 require (
-	github.com/flohansen/nova-cloud/proto v0.0.0-20241230153155-d680aafbe629
 	google.golang.org/grpc v1.69.2
 	google.golang.org/protobuf v1.36.1
 )

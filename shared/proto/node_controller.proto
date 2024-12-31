@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package novacloud;
+
+option go_package = "./proto";
+
+service NodeController {
+    rpc RegisterNode(RegisterNodeRequest) returns (Nothing);
+}
+
+message Nothing { }
+
+message RegisterNodeRequest {
+    bytes ip = 1;
+    int32 port = 2;
+}

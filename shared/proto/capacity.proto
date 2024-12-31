@@ -1,11 +1,11 @@
 syntax = "proto3";
 
-package capacity;
+package novacloud;
 
 option go_package = "./proto";
 
 service CapacityService {
-    rpc GetMachineInfo(GetMachineInfoRequest) returns (GetMachineInfoResponse) {}
+    rpc GetMachineInfo(GetMachineInfoRequest) returns (GetMachineInfoResponse);
 }
 
 message GetMachineInfoRequest {

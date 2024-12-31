@@ -3,7 +3,7 @@ package api
 import (
 	"context"
 
-	"github.com/flohansen/nova-cloud/capacity/internal/proc"
+	"github.com/flohansen/nova-cloud/internal/proc"
 	proto "github.com/flohansen/nova-cloud/proto/go"
 )
 
