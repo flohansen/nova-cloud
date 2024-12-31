@@ -8,7 +8,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/flohansen/nova-cloud/internal/api"
+	"github.com/flohansen/nova-cloud/internal/node/api"
 	proto "github.com/flohansen/nova-cloud/proto/go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
