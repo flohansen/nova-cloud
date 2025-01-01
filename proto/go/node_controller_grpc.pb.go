@@ -19,7 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	NodeController_RegisterNode_FullMethodName = "/novacloud.NodeController/RegisterNode"
+	NodeController_RegisterNode_FullMethodName       = "/novacloud.NodeController/RegisterNode"
+	NodeController_ProvisionResources_FullMethodName = "/novacloud.NodeController/ProvisionResources"
 )
 
 // NodeControllerClient is the client API for NodeController service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type NodeControllerClient interface {
 	RegisterNode(ctx context.Context, in *RegisterNodeRequest, opts ...grpc.CallOption) (*Nothing, error)
+	ProvisionResources(ctx context.Context, in *ProvisionResourcesRequest, opts ...grpc.CallOption) (*Nothing, error)
 }
 
 type nodeControllerClient struct {
@@ -47,11 +49,22 @@ func (c *nodeControllerClient) RegisterNode(ctx context.Context, in *RegisterNod
 	return out, nil
 }
 
+func (c *nodeControllerClient) ProvisionResources(ctx context.Context, in *ProvisionResourcesRequest, opts ...grpc.CallOption) (*Nothing, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Nothing)
+	err := c.cc.Invoke(ctx, NodeController_ProvisionResources_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // NodeControllerServer is the server API for NodeController service.
 // All implementations must embed UnimplementedNodeControllerServer
 // for forward compatibility.
 type NodeControllerServer interface {
 	RegisterNode(context.Context, *RegisterNodeRequest) (*Nothing, error)
+	ProvisionResources(context.Context, *ProvisionResourcesRequest) (*Nothing, error)
 	mustEmbedUnimplementedNodeControllerServer()
 }
 
@@ -64,6 +77,9 @@ type UnimplementedNodeControllerServer struct{}
 
 func (UnimplementedNodeControllerServer) RegisterNode(context.Context, *RegisterNodeRequest) (*Nothing, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RegisterNode not implemented")
+}
+func (UnimplementedNodeControllerServer) ProvisionResources(context.Context, *ProvisionResourcesRequest) (*Nothing, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ProvisionResources not implemented")
 }
 func (UnimplementedNodeControllerServer) mustEmbedUnimplementedNodeControllerServer() {}
 func (UnimplementedNodeControllerServer) testEmbeddedByValue()                        {}
@@ -104,6 +120,24 @@ func _NodeController_RegisterNode_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _NodeController_ProvisionResources_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProvisionResourcesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NodeControllerServer).ProvisionResources(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NodeController_ProvisionResources_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NodeControllerServer).ProvisionResources(ctx, req.(*ProvisionResourcesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // NodeController_ServiceDesc is the grpc.ServiceDesc for NodeController service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -114,6 +148,10 @@ var NodeController_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RegisterNode",
 			Handler:    _NodeController_RegisterNode_Handler,
+		},
+		{
+			MethodName: "ProvisionResources",
+			Handler:    _NodeController_ProvisionResources_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

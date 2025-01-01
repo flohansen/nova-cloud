@@ -6,11 +6,13 @@ option go_package = "./proto";
 
 service NodeController {
     rpc RegisterNode(RegisterNodeRequest) returns (Nothing);
+    rpc ProvisionResources(ProvisionResourcesRequest) returns (Nothing);
 }
 
 message Nothing { }
 
 message RegisterNodeRequest {
-    bytes ip = 1;
-    int32 port = 2;
+    int32 port = 1;
 }
+
+message ProvisionResourcesRequest { }

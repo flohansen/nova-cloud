@@ -15,6 +15,7 @@ import (
 )
 
 var (
+	port           = flag.Int("port", 3000, "The port on which the node server should listen")
 	controllerAddr = flag.String("controller-addr", "localhost:3010", "The address of the node controller")
 )
 
@@ -40,7 +41,9 @@ func registerNode() error {
 	c := proto.NewNodeControllerClient(conn)
 
 	ctx, _ := context.WithTimeout(context.Background(), time.Second)
-	_, err = c.RegisterNode(ctx, &proto.RegisterNodeRequest{})
+	_, err = c.RegisterNode(ctx, &proto.RegisterNodeRequest{
+		Port: int32(*port),
+	})
 	if err != nil {
 		return fmt.Errorf("could not register node: %s", err)
 	}
@@ -49,7 +52,7 @@ func registerNode() error {
 }
 
 func serveMetrics() error {
-	lis, err := net.Listen("tcp", ":3000")
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 	if err != nil {
 		return fmt.Errorf("could not listen: %s", err)
 	}
