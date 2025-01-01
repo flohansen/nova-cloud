@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package novacloud;
+
+option go_package = "./proto";
+
+service Node {
+    rpc GetMachineInfo(GetMachineInfoRequest) returns (GetMachineInfoResponse);
+    rpc Aquire(AquireRequest) returns (AquireResponse);
+}
+
+message AquireRequest {
+    int32 cpu_cores = 1;
+    int32 memory_bytes = 2;
+}
+
+message AquireResponse {
+}
+
+message GetMachineInfoRequest {
+}
+
+message GetMachineInfoResponse {
+    int32 cpu_cores = 1;
+    int32 memory_bytes = 2;
+}

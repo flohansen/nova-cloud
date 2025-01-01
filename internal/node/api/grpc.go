@@ -2,13 +2,14 @@ package api
 
 import (
 	"context"
+	"log"
 
 	"github.com/flohansen/nova-cloud/internal/node/proc"
 	proto "github.com/flohansen/nova-cloud/proto/go"
 )
 
 type Server struct {
-	proto.UnimplementedCapacityServiceServer
+	proto.UnimplementedNodeServer
 }
 
 func (s *Server) GetMachineInfo(context.Context, *proto.GetMachineInfoRequest) (*proto.GetMachineInfoResponse, error) {
@@ -16,7 +17,12 @@ func (s *Server) GetMachineInfo(context.Context, *proto.GetMachineInfoRequest) (
 	memInfo := proc.GetMemInfo()
 
 	return &proto.GetMachineInfoResponse{
-		Cpu: cores,
-		Ram: memInfo.MemTotal,
+		CpuCores:    cores,
+		MemoryBytes: memInfo.MemTotal * 1024,
 	}, nil
+}
+
+func (s *Server) Aquire(ctx context.Context, r *proto.AquireRequest) (*proto.AquireResponse, error) {
+	log.Printf("starting new VM with %+v", r)
+	return &proto.AquireResponse{}, nil
 }

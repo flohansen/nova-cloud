@@ -25,7 +25,7 @@ func (n *PhyisicalNode) GetResources(ctx context.Context) (*proto.GetMachineInfo
 	}
 	defer conn.Close()
 
-	c := proto.NewCapacityServiceClient(conn)
+	c := proto.NewNodeClient(conn)
 
 	res, err := c.GetMachineInfo(ctx, &proto.GetMachineInfoRequest{})
 	if err != nil {
@@ -35,12 +35,29 @@ func (n *PhyisicalNode) GetResources(ctx context.Context) (*proto.GetMachineInfo
 	return res, nil
 }
 
+func (n *PhyisicalNode) Aquire(ctx context.Context, r *proto.AquireRequest) error {
+	conn, err := grpc.NewClient(n.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return fmt.Errorf("could not create gRPC client: %s", err)
+	}
+	defer conn.Close()
+
+	c := proto.NewNodeClient(conn)
+
+	_, err = c.Aquire(ctx, r)
+	if err != nil {
+		return fmt.Errorf("could not aquire resources: %s", err)
+	}
+
+	return nil
+}
+
 type Server struct {
 	proto.UnimplementedNodeControllerServer
 	nodes []PhyisicalNode
 }
 
-func (s *Server) RegisterNode(ctx context.Context, r *proto.RegisterNodeRequest) (*proto.Nothing, error) {
+func (s *Server) RegisterNode(ctx context.Context, r *proto.RegisterNodeRequest) (*proto.RegisterNodeResponse, error) {
 	p, ok := peer.FromContext(ctx)
 	if !ok {
 		return nil, status.Errorf(codes.Internal, "failed to get peer from context")
@@ -67,18 +84,34 @@ func (s *Server) RegisterNode(ctx context.Context, r *proto.RegisterNodeRequest)
 		Addr: addrString,
 	})
 
-	return &proto.Nothing{}, nil
+	return &proto.RegisterNodeResponse{}, nil
 }
 
-func (s *Server) ProvisionResources(ctx context.Context, r *proto.ProvisionResourcesRequest) (*proto.Nothing, error) {
+func (s *Server) ProvisionResources(ctx context.Context, r *proto.ProvisionResourcesRequest) (*proto.ProvisionResourcesResponse, error) {
 	for _, node := range s.nodes {
-		_, err := node.GetResources(ctx)
+		res, err := node.GetResources(ctx)
 		if err != nil {
 			log.Printf("could not fetch physical node info: %s", err)
+			continue
 		}
 
-		// TODO: Add placement algorithm
+		if res.CpuCores < r.CpuCores {
+			continue
+		}
+
+		if res.MemoryBytes < r.MemoryBytes {
+			continue
+		}
+
+		if err := node.Aquire(ctx, &proto.AquireRequest{
+			CpuCores:    r.CpuCores,
+			MemoryBytes: r.MemoryBytes,
+		}); err != nil {
+			return nil, status.Errorf(codes.Internal, "invalid node configuration: %s", err)
+		}
+
+		return &proto.ProvisionResourcesResponse{}, nil
 	}
 
-	return &proto.Nothing{}, nil
+	return nil, status.Errorf(codes.Internal, "no node has enough resources for this request %+v", r)
 }

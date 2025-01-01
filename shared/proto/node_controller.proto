@@ -5,14 +5,21 @@ package novacloud;
 option go_package = "./proto";
 
 service NodeController {
-    rpc RegisterNode(RegisterNodeRequest) returns (Nothing);
-    rpc ProvisionResources(ProvisionResourcesRequest) returns (Nothing);
+    rpc RegisterNode(RegisterNodeRequest) returns (RegisterNodeResponse);
+    rpc ProvisionResources(ProvisionResourcesRequest) returns (ProvisionResourcesResponse);
 }
-
-message Nothing { }
 
 message RegisterNodeRequest {
     int32 port = 1;
 }
 
-message ProvisionResourcesRequest { }
+message RegisterNodeResponse {
+}
+
+message ProvisionResourcesRequest {
+    int32 cpu_cores = 1;
+    int32 memory_bytes = 2;
+}
+
+message ProvisionResourcesResponse {
+}

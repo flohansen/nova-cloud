@@ -58,7 +58,7 @@ func serveMetrics() error {
 	}
 
 	srv := grpc.NewServer()
-	proto.RegisterCapacityServiceServer(srv, &api.Server{})
+	proto.RegisterNodeServer(srv, &api.Server{})
 
 	return fmt.Errorf("could not serve: %s", srv.Serve(lis))
 }
