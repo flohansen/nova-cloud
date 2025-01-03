@@ -14,7 +14,7 @@ PROTO_FILES ?= $(wildcard $(PROTO_DIR)/*.proto)
 ################################################################################
 
 .PHONY: setup
-setup: proto-go
+setup:
 	cp hack/github/pre-push .git/hooks/pre-push
 
 .PHONY: clean
