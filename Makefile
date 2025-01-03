@@ -13,10 +13,19 @@ PROTO_FILES ?= $(wildcard $(PROTO_DIR)/*.proto)
 
 ################################################################################
 
+.PHONY: setup
+setup: proto-go
+	cp hack/github/pre-push .git/hooks/pre-push
+
+.PHONY: clean
+clean: proto-clean
+	rm -f .git/hooks/pre-push
+
+.PHONY: proto-setup
 proto-setup: proto-clean
 	mkdir -p $(PROTO_GO_OUT)
 
-.PHONY: generate
+.PHONY: proto-go
 proto-go: proto-setup
 	$(PROTOC) \
 		-I=$(PROTO_DIR) \
@@ -26,6 +35,6 @@ proto-go: proto-setup
 		--go-grpc_opt=paths=source_relative \
 		$(PROTO_FILES)
 
-.PHONY: clean
+.PHONY: proto-clean
 proto-clean:
 	rm -rf $(PROTO_GO_OUT)
