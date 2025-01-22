@@ -15,7 +15,7 @@ PROTO_FILES ?= $(wildcard $(PROTO_DIR)/*.proto)
 
 .PHONY: setup
 setup:
-	cp hack/github/pre-push .git/hooks/pre-push
+	cp .githooks/pre-push .git/hooks/pre-push
 
 .PHONY: clean
 clean: proto-clean
