@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package novacloud.v1;
+
+option go_package = "novacloud/v1";
+
+service NodeService {
+  rpc GetResources(GetResourcesRequest) returns (GetResourcesResponse);
+}
+
+message GetResourcesRequest {
+}
+
+enum CpuArch {
+  CPU_ARCH_UNSPECIFIED = 0;
+
+  // x86 family
+  CPU_ARCH_X86 = 1;          // 32-bit x86
+  CPU_ARCH_X86_64 = 2;       // 64-bit x86 (AMD64/Intel 64)
+  
+  // ARM family
+  CPU_ARCH_ARM = 3;          // 32-bit ARM
+  CPU_ARCH_ARM64 = 4;        // 64-bit ARM (AArch64)
+}
+
+message GetResourcesResponse {
+  CpuArch cpu_architecture = 1;
+  int32 cpu_cores = 2;
+}
