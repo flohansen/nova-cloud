@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package novacloud.v1;
+
+option go_package = "novacloud/v1";
+
+import "novacloud/v1/node.proto";
+
+service NodeAgentService {
+  rpc GetResources(GetResourcesRequest) returns (GetResourcesResponse);
+}
+
+message GetResourcesRequest {
+}
+
+message GetResourcesResponse {
+  CpuArch cpu_arch = 1;
+  int32 cpu_cores = 2;
+}
