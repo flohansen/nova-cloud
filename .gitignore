@@ -2,6 +2,7 @@
 /bin/
 /internal/proto/
 mocks/
+generated/
 
 # downloaded files
 /*.zip

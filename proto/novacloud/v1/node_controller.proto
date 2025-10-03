@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package novacloud.v1;
+
+option go_package = "novacloud/v1";
+
+import "novacloud/v1/node.proto";
+
+service NodeControllerService {
+  rpc RegisterNode(RegisterNodeRequest) returns(RegisterNodeResponse);
+  rpc GetNodes(GetNodesRequest) returns(stream GetNodesResponse);
+}
+
+message RegisterNodeRequest {
+  int32 port = 1;
+}
+
+message RegisterNodeResponse {
+}
+
+message GetNodesRequest {
+}
+
+message GetNodesResponse {
+  string ip = 1;
+  int32 port = 2;
+  CpuArch cpu_arch = 3;
+  int32 cpu_cores = 4;
+}

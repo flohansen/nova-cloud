@@ -10,14 +10,20 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
+
+        go-migrate = pkgs.go-migrate.overrideAttrs(oldAttrs: {
+            tags = ["sqlite"];
+        });
       in {
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
             go
+            go-migrate
             protobuf
             protoc-gen-go
             protoc-gen-go-grpc
             mockgen
+            sqlc
           ];
         };
       });
