@@ -1,4 +1,4 @@
-package controller
+package handler
 
 import (
 	"context"
@@ -7,17 +7,17 @@ import (
 	v1 "github.com/flohansen/nova-cloud/internal/proto/novacloud/v1"
 )
 
-var _ v1.NodeAgentServiceServer = &NodeController{}
+var _ v1.NodeAgentServiceServer = &NodeAgentHandler{}
 
-type NodeController struct {
+type NodeAgentHandler struct {
 	v1.UnsafeNodeAgentServiceServer
 }
 
-func NewNodeController() *NodeController {
-	return &NodeController{}
+func NewNodeAgentHandler() *NodeAgentHandler {
+	return &NodeAgentHandler{}
 }
 
-func (n *NodeController) GetResources(context.Context, *v1.GetResourcesRequest) (*v1.GetResourcesResponse, error) {
+func (n *NodeAgentHandler) GetResources(context.Context, *v1.GetResourcesRequest) (*v1.GetResourcesResponse, error) {
 	cpuCores := int32(runtime.NumCPU())
 
 	cpuArch := v1.CpuArch_CPU_ARCH_UNSPECIFIED

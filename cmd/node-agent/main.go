@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/flohansen/nova-cloud/internal/app"
-	"github.com/flohansen/nova-cloud/internal/controller"
+	"github.com/flohansen/nova-cloud/internal/handler"
 )
 
 type flags struct {
@@ -36,7 +36,7 @@ func main() {
 		opts = append(opts, app.WithReflection())
 	}
 
-	controller := controller.NewNodeController()
+	controller := handler.NewNodeAgentHandler()
 	srv := app.NewServer(lis, controller, logger, opts...)
 	if err := srv.Run(ctx); err != nil {
 		logger.Error("gRPC server error", "error", err)
