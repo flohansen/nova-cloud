@@ -1,10 +1,10 @@
-package controller_test
+package handler_test
 
 import (
 	"context"
 	"testing"
 
-	"github.com/flohansen/nova-cloud/internal/controller"
+	"github.com/flohansen/nova-cloud/internal/handler"
 	v1 "github.com/flohansen/nova-cloud/internal/proto/novacloud/v1"
 	"github.com/stretchr/testify/assert"
 )
@@ -12,7 +12,7 @@ import (
 func TestNodeController_NewNodeController(t *testing.T) {
 	// assign
 	// act
-	ctrl := controller.NewNodeController()
+	ctrl := handler.NewNodeAgentHandler()
 
 	// assert
 	assert.NotNil(t, ctrl)
@@ -21,7 +21,7 @@ func TestNodeController_NewNodeController(t *testing.T) {
 func TestNodeController_GetResources(t *testing.T) {
 	// assign
 	ctx := context.Background()
-	ctrl := controller.NewNodeController()
+	ctrl := handler.NewNodeAgentHandler()
 
 	// act
 	res, err := ctrl.GetResources(ctx, &v1.GetResourcesRequest{})
