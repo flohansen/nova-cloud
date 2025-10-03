@@ -1,6 +1,7 @@
 package logging
 
 type Logger interface {
-	Error(msg string, v ...any)
-	Info(msg string, v ...any)
+	Info(msg string, args ...any)
+	Warn(msg string, args ...any)
+	Error(msg string, args ...any)
 }
