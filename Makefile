@@ -18,8 +18,12 @@ test: generate
 	$(GO) test ./... -race -cover
 
 .PHONY: generate
-generate: generate-proto
+generate: generate-sql generate-proto
 	$(GO) generate ./...
+
+.PHONY: generate-sql
+generate-sql:
+	$(SQLC) generate
 
 .PHONY: generate-proto
 generate-proto: $(PROTOC_OUT)
