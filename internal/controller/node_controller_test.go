@@ -29,5 +29,5 @@ func TestNodeController_GetResources(t *testing.T) {
 	// assert
 	assert.NoError(t, err)
 	assert.Greater(t, res.CpuCores, int32(0))
-	assert.NotEqual(t, res.CpuArchitecture, v1.CpuArch_CPU_ARCH_UNSPECIFIED)
+	assert.NotEqual(t, res.CpuArch, v1.CpuArch_CPU_ARCH_UNSPECIFIED)
 }

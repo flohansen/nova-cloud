@@ -7,10 +7,10 @@ import (
 	v1 "github.com/flohansen/nova-cloud/internal/proto/novacloud/v1"
 )
 
-var _ v1.NodeServiceServer = &NodeController{}
+var _ v1.NodeAgentServiceServer = &NodeController{}
 
 type NodeController struct {
-	v1.UnsafeNodeServiceServer
+	v1.UnsafeNodeAgentServiceServer
 }
 
 func NewNodeController() *NodeController {
@@ -33,7 +33,7 @@ func (n *NodeController) GetResources(context.Context, *v1.GetResourcesRequest) 
 	}
 
 	return &v1.GetResourcesResponse{
-		CpuCores:        cpuCores,
-		CpuArchitecture: cpuArch,
+		CpuCores: cpuCores,
+		CpuArch:  cpuArch,
 	}, nil
 }

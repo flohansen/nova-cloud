@@ -10,18 +10,18 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-//go:generate mockgen -destination=mocks/node_service_server.go -package=mocks github.com/flohansen/nova-cloud/internal/proto/novacloud/v1 NodeServiceServer
+//go:generate mockgen -destination=mocks/node_service_server.go -package=mocks github.com/flohansen/nova-cloud/internal/proto/novacloud/v1 NodeAgentServiceServer
 //go:generate mockgen -destination=mocks/logger.go -package=mocks github.com/flohansen/nova-cloud/internal/logging Logger
 
 type Server struct {
 	logger           logging.Logger
 	listener         net.Listener
-	controller       v1.NodeServiceServer
+	controller       v1.NodeAgentServiceServer
 	server           *grpc.Server
 	enableReflection bool
 }
 
-func NewServer(listener net.Listener, controller v1.NodeServiceServer, logger logging.Logger, opts ...ServerOpt) *Server {
+func NewServer(listener net.Listener, controller v1.NodeAgentServiceServer, logger logging.Logger, opts ...ServerOpt) *Server {
 	s := &Server{
 		logger:           logger,
 		listener:         listener,
@@ -43,7 +43,7 @@ func (s *Server) Run(ctx context.Context) error {
 		reflection.Register(s.server)
 	}
 
-	v1.RegisterNodeServiceServer(s.server, s.controller)
+	v1.RegisterNodeAgentServiceServer(s.server, s.controller)
 
 	go s.handleShutdown(ctx)
 

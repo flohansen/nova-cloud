@@ -24,7 +24,7 @@ func TestServer_NewServer(t *testing.T) {
 func TestServer_Run(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	controllerMock := &controllerMockWrapper{
-		mock: mocks.NewMockNodeServiceServer(ctrl),
+		mock: mocks.NewMockNodeAgentServiceServer(ctrl),
 	}
 	loggerMock := mocks.NewMockLogger(ctrl)
 
@@ -87,8 +87,8 @@ func TestServer_Run(t *testing.T) {
 }
 
 type controllerMockWrapper struct {
-	v1.UnimplementedNodeServiceServer
-	mock *mocks.MockNodeServiceServer
+	v1.UnimplementedNodeAgentServiceServer
+	mock *mocks.MockNodeAgentServiceServer
 }
 
 func (m *controllerMockWrapper) GetResources(ctx context.Context, req *v1.GetResourcesRequest) (*v1.GetResourcesResponse, error) {
