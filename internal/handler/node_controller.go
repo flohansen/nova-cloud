@@ -3,13 +3,10 @@ package handler
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"net"
-	"os"
-	"time"
 
+	"github.com/flohansen/nova-cloud/internal/domain"
 	novacloudv1 "github.com/flohansen/nova-cloud/internal/proto/novacloud/v1"
-	"github.com/flohansen/nova-cloud/sql/generated/database"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -18,19 +15,24 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+type NodeRepository interface {
+	FindAll(ctx context.Context) ([]domain.Node, error)
+	CreateOrUpdate(ctx context.Context, node domain.Node) error
+	Delete(ctx context.Context, nodeID string) error
+}
+
+//go:generate mockgen -destination=mocks/node_stream.go -package=mocks github.com/flohansen/nova-cloud/internal/proto/novacloud/v1 NodeControllerService_GetNodesServer
+
 type NodeControllerHandler struct {
 	novacloudv1.UnimplementedNodeControllerServiceServer
 
-	q *database.Queries
+	nodeRepo NodeRepository
 }
 
-func NewNodeControllerHandler(db database.DBTX) *NodeControllerHandler {
-	h := &NodeControllerHandler{
-		q: database.New(db),
+func NewNodeControllerHandler(nodeRepo NodeRepository) *NodeControllerHandler {
+	return &NodeControllerHandler{
+		nodeRepo: nodeRepo,
 	}
-
-	go h.startHealthChecks(context.Background())
-	return h
 }
 
 func (h *NodeControllerHandler) RegisterNode(ctx context.Context, req *novacloudv1.RegisterNodeRequest) (*novacloudv1.RegisterNodeResponse, error) {
@@ -41,7 +43,13 @@ func (h *NodeControllerHandler) RegisterNode(ctx context.Context, req *novacloud
 		return nil, status.Error(codes.Internal, "peer address is not a TCP address")
 	}
 
-	target := fmt.Sprintf("%s:%d", tcpAddr.IP, req.Port)
+	var target string
+	if ip := tcpAddr.IP.To4(); ip != nil {
+		target = fmt.Sprintf("%s:%d", tcpAddr.IP, req.Port)
+	} else {
+		target = fmt.Sprintf("[%s]:%d", tcpAddr.IP, req.Port)
+	}
+
 	conn, err := grpc.NewClient(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "could not create grpc client: %v", err)
@@ -53,7 +61,7 @@ func (h *NodeControllerHandler) RegisterNode(ctx context.Context, req *novacloud
 		return nil, status.Errorf(codes.Internal, "node get resources error: %v", err)
 	}
 
-	if err := h.q.UpsertNode(ctx, database.UpsertNodeParams{
+	if err := h.nodeRepo.CreateOrUpdate(ctx, domain.Node{
 		Ip:      tcpAddr.IP.String(),
 		NodeID:  target,
 		Port:    int64(req.Port),
@@ -67,7 +75,7 @@ func (h *NodeControllerHandler) RegisterNode(ctx context.Context, req *novacloud
 }
 
 func (h *NodeControllerHandler) GetNodes(req *novacloudv1.GetNodesRequest, stream grpc.ServerStreamingServer[novacloudv1.GetNodesResponse]) error {
-	nodes, err := h.q.GetNodes(stream.Context())
+	nodes, err := h.nodeRepo.FindAll(stream.Context())
 	if err != nil {
 		return status.Errorf(codes.Internal, "get nodes error: %v", err)
 	}
@@ -82,39 +90,4 @@ func (h *NodeControllerHandler) GetNodes(req *novacloudv1.GetNodesRequest, strea
 	}
 
 	return nil
-}
-
-func (h *NodeControllerHandler) startHealthChecks(ctx context.Context) {
-	log := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{}))
-
-	for {
-		time.Sleep(time.Second)
-
-		nodes, err := h.q.GetNodes(ctx)
-		if err != nil {
-			log.Error("get nodes", "error", err)
-			continue
-		}
-
-		for _, node := range nodes {
-			target := fmt.Sprintf("%s:%d", node.Ip, node.Port)
-			conn, err := grpc.NewClient(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
-			if err != nil {
-				log.Error("new grpc client", "error", err)
-				continue
-			}
-
-			client := novacloudv1.NewNodeAgentServiceClient(conn)
-			_, err = client.GetResources(ctx, &novacloudv1.GetResourcesRequest{})
-			if err != nil {
-				log.Info("healthcheck failed", "error", err, "target", target)
-
-				if err := h.q.DeleteNode(ctx, target); err != nil {
-					log.Error("delete node", "error", err, "target", target)
-				}
-
-				continue
-			}
-		}
-	}
 }
