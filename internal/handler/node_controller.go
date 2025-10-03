@@ -95,3 +95,7 @@ func (h *NodeControllerHandler) GetNodes(req *novacloudv1.GetNodesRequest, strea
 
 	return nil
 }
+
+func (h *NodeControllerHandler) CreateInstance(ctx context.Context, req *novacloudv1.CreateInstanceRequest) (*novacloudv1.CreateInstanceResponse, error) {
+	return &novacloudv1.CreateInstanceResponse{}, nil
+}

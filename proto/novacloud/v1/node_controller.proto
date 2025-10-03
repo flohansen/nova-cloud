@@ -9,6 +9,7 @@ import "novacloud/v1/node.proto";
 service NodeControllerService {
   rpc RegisterNode(RegisterNodeRequest) returns(RegisterNodeResponse);
   rpc GetNodes(GetNodesRequest) returns(stream GetNodesResponse);
+  rpc CreateInstance(CreateInstanceRequest) returns(CreateInstanceResponse);
 }
 
 message RegisterNodeRequest {
@@ -26,4 +27,13 @@ message GetNodesResponse {
   int32 port = 2;
   CpuArch cpu_arch = 3;
   int32 cpu_cores = 4;
+}
+
+message CreateInstanceRequest {
+  int32 vcpu = 1;
+  CpuArch arch = 2;
+}
+
+message CreateInstanceResponse {
+  string ip = 1;
 }

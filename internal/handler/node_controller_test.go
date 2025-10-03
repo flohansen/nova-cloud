@@ -69,3 +69,30 @@ func TestNodeControllerHandler_GetNodes(t *testing.T) {
 	// then
 	assert.NoError(t, err)
 }
+
+func TestNodeControllerHandler_CreateInstance(t *testing.T) {
+	for _, tt := range []struct {
+		name string
+	}{
+		{name: "no nodes"},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			// given
+			ctx := t.Context()
+			req := &novacloudv1.CreateInstanceRequest{
+				Vcpu: 1,
+				Arch: novacloudv1.CpuArch_CPU_ARCH_ARM,
+			}
+
+			nodeRepo := doubles.NewTestNodeRepository()
+			h := handler.NewNodeControllerHandler(nodeRepo)
+
+			// when
+			res, err := h.CreateInstance(ctx, req)
+
+			// then
+			assert.NoError(t, err)
+			assert.NotNil(t, res)
+		})
+	}
+}
