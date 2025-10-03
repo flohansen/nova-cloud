@@ -5,6 +5,7 @@ import (
 	"runtime"
 
 	v1 "github.com/flohansen/nova-cloud/internal/proto/novacloud/v1"
+	"google.golang.org/grpc"
 )
 
 var _ v1.NodeAgentServiceServer = &NodeAgentHandler{}
@@ -17,7 +18,11 @@ func NewNodeAgentHandler() *NodeAgentHandler {
 	return &NodeAgentHandler{}
 }
 
-func (n *NodeAgentHandler) GetResources(context.Context, *v1.GetResourcesRequest) (*v1.GetResourcesResponse, error) {
+func (n *NodeAgentHandler) Desc() *grpc.ServiceDesc {
+	return &v1.NodeAgentService_ServiceDesc
+}
+
+func (n *NodeAgentHandler) GetResources(ctx context.Context, req *v1.GetResourcesRequest) (*v1.GetResourcesResponse, error) {
 	cpuCores := int32(runtime.NumCPU())
 
 	cpuArch := v1.CpuArch_CPU_ARCH_UNSPECIFIED

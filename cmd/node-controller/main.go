@@ -4,16 +4,14 @@ import (
 	"database/sql"
 	"flag"
 	"log/slog"
-	"net"
 	"os"
 
 	_ "modernc.org/sqlite"
 
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
-
+	"github.com/flohansen/nova-cloud/internal/app"
+	"github.com/flohansen/nova-cloud/internal/grpc"
 	"github.com/flohansen/nova-cloud/internal/handler"
-	novacloudv1 "github.com/flohansen/nova-cloud/internal/proto/novacloud/v1"
+	"github.com/flohansen/nova-cloud/internal/logging"
 	"github.com/flohansen/nova-cloud/internal/repository"
 	"github.com/flohansen/nova-cloud/sql/migrations"
 )
@@ -27,7 +25,9 @@ func main() {
 	flag.StringVar(&config.ListenAddr, "listen", "0.0.0.0:5050", "The listen address of the gRPC server")
 	flag.Parse()
 
+	ctx := app.SignalContext()
 	log := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{}))
+	ctx = logging.WithContext(ctx, log)
 
 	db, err := sql.Open("sqlite", ":memory:")
 	if err != nil {
@@ -41,20 +41,12 @@ func main() {
 	}
 
 	nodeRepo := repository.NewNodeRepository(db)
-	nodeController := handler.NewNodeControllerHandler(nodeRepo)
+	nodeControllerService := handler.NewNodeControllerHandler(nodeRepo)
 
-	srv := grpc.NewServer()
-	novacloudv1.RegisterNodeControllerServiceServer(srv, nodeController)
-	reflection.Register(srv)
-
-	lis, err := net.Listen("tcp", config.ListenAddr)
-	if err != nil {
-		log.Error("listen error", "error", err)
-		os.Exit(1)
-	}
-
-	log.Info("server started", "addr", config.ListenAddr)
-	if err := srv.Serve(lis); err != nil {
+	if err := grpc.NewServer(
+		grpc.WithListenAddr(config.ListenAddr),
+		grpc.WithService(nodeControllerService),
+	).Serve(ctx); err != nil {
 		log.Error("serve error", "error", err)
 		os.Exit(1)
 	}
