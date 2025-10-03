@@ -35,6 +35,10 @@ func NewNodeControllerHandler(nodeRepo NodeRepository) *NodeControllerHandler {
 	}
 }
 
+func (h *NodeControllerHandler) Desc() *grpc.ServiceDesc {
+	return &novacloudv1.NodeControllerService_ServiceDesc
+}
+
 func (h *NodeControllerHandler) RegisterNode(ctx context.Context, req *novacloudv1.RegisterNodeRequest) (*novacloudv1.RegisterNodeResponse, error) {
 	p, _ := peer.FromContext(ctx)
 
