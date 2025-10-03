@@ -6,40 +6,37 @@ import (
 	"net"
 	"os"
 
-	"github.com/flohansen/nova-cloud/internal/app"
 	"github.com/flohansen/nova-cloud/internal/handler"
+	novacloudv1 "github.com/flohansen/nova-cloud/internal/proto/novacloud/v1"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
-type flags struct {
-	EnableReflection bool
-	ListenAddr       string
+type config struct {
+	ListenAddr string
 }
 
 func main() {
-	var flags flags
-	flag.BoolVar(&flags.EnableReflection, "reflection", false, "If the gRPC server should enable reflection")
-	flag.StringVar(&flags.ListenAddr, "listen", "0.0.0.0:5050", "The listen address of the gRPC server")
+	var config config
+	flag.StringVar(&config.ListenAddr, "listen", "0.0.0.0:5050", "The listen address of the gRPC server")
 	flag.Parse()
 
-	ctx := app.SignalContext()
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	controller := handler.NewNodeAgentHandler()
 
-	lis, err := net.Listen("tcp", flags.ListenAddr)
+	srv := grpc.NewServer()
+	novacloudv1.RegisterNodeAgentServiceServer(srv, controller)
+	reflection.Register(srv)
+
+	lis, err := net.Listen("tcp", config.ListenAddr)
 	if err != nil {
-		logger.Error("could not create network listener", "error", err)
+		log.Error("could not create network listener", "error", err)
 		os.Exit(1)
 	}
-	defer lis.Close()
 
-	var opts []app.ServerOpt
-	if flags.EnableReflection {
-		opts = append(opts, app.WithReflection())
-	}
-
-	controller := handler.NewNodeAgentHandler()
-	srv := app.NewServer(lis, controller, logger, opts...)
-	if err := srv.Run(ctx); err != nil {
-		logger.Error("gRPC server error", "error", err)
+	log.Info("server started", "addr", config.ListenAddr)
+	if err := srv.Serve(lis); err != nil {
+		log.Error("serve error", "error", err)
 		os.Exit(1)
 	}
 }
