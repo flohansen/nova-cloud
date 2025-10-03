@@ -18,18 +18,20 @@ import (
 
 type config struct {
 	ListenAddr string
+	Database   string
 }
 
 func main() {
 	var config config
 	flag.StringVar(&config.ListenAddr, "listen", "0.0.0.0:5050", "The listen address of the gRPC server")
+	flag.StringVar(&config.Database, "database", ":memory:", "The SQLite database path")
 	flag.Parse()
 
 	ctx := app.SignalContext()
 	log := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{}))
 	ctx = logging.WithContext(ctx, log)
 
-	db, err := sql.Open("sqlite", ":memory:")
+	db, err := sql.Open("sqlite", config.Database)
 	if err != nil {
 		log.Error("sql open error", "error", err)
 		os.Exit(1)
